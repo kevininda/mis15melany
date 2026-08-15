@@ -611,6 +611,10 @@
     display:block;
     width:100%;
     aspect-ratio:16/9;
+  }  #enter-btn:disabled{
+    opacity:0.55;
+    cursor:default;
+    pointer-events:none;
   }
 </style>
 </head>
@@ -635,7 +639,7 @@
     <p class="eyebrow">Te invito a festejar</p>
     <h1 class="script name">Mis quince</h1>
     <p class="cover-sub">Melany · 03 de Septiembre</p>
-    <button id="enter-btn" aria-label="Entrar a la invitación">
+    <button id="enter-btn" aria-label="Entrar a la invitación" disabled>
       <span class="disco-ball" aria-hidden="true"></span>
       Entrar
     </button>
@@ -801,7 +805,6 @@
   // ---------- background music (YouTube, official video) ----------
   let ytPlayer = null;
   let ytReady = false;
-  let wantsPlay = false;
 
   window.onYouTubeIframeAPIReady = function(){
     ytPlayer = new YT.Player('yt-player', {
@@ -810,14 +813,16 @@
       events: {
         onReady: () => {
           ytReady = true;
-          if(wantsPlay){ ytPlayer.playVideo(); }
+          enterBtn.disabled = false;
         }
       }
     });
   };
 
+  // if YouTube takes too long to respond, let people in anyway (music just won't autoplay)
+  setTimeout(() => { enterBtn.disabled = false; }, 4000);
+
   function startMusic(){
-    wantsPlay = true;
     if(ytReady && ytPlayer){
       ytPlayer.playVideo();
     }
