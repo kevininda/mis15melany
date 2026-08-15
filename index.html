@@ -600,11 +600,17 @@
     transform:translateY(8px);
     pointer-events:none;
     transition:opacity 0.25s ease, transform 0.25s ease;
+    background:#000;
   }
   #music-panel.open{
     opacity:1;
     transform:translateY(0);
     pointer-events:auto;
+  }
+  #music-panel iframe{
+    display:block;
+    width:100%;
+    aspect-ratio:16/9;
   }
 </style>
 </head>
@@ -742,8 +748,9 @@
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
 </button>
 <div id="music-panel">
-  <iframe id="spotify-frame" style="border-radius:16px;" src="https://open.spotify.com/embed/track/24lMtPOCzP5g4hrg3NklLa?utm_source=generator" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+  <div id="yt-player"></div>
 </div>
+<script src="https://www.youtube.com/iframe_api"></script>
 
 <script>
   // ---------- confetti scatter ----------
@@ -786,6 +793,44 @@
     setTimeout(()=>{
       main.classList.add('show');
     }, 250);
+
+    // start the music using the click itself as the required user gesture
+    startMusic();
+  });
+
+  // ---------- background music (YouTube, official video) ----------
+  let ytPlayer = null;
+  let ytReady = false;
+  let wantsPlay = false;
+
+  window.onYouTubeIframeAPIReady = function(){
+    ytPlayer = new YT.Player('yt-player', {
+      videoId: 'LjhCEhWiKXk', // Bruno Mars - Just The Way You Are (Official Music Video)
+      playerVars: { rel: 0 },
+      events: {
+        onReady: () => {
+          ytReady = true;
+          if(wantsPlay){ ytPlayer.playVideo(); }
+        }
+      }
+    });
+  };
+
+  function startMusic(){
+    wantsPlay = true;
+    if(ytReady && ytPlayer){
+      ytPlayer.playVideo();
+    }
+  }
+
+  const musicToggle = document.getElementById('music-toggle');
+  const musicPanel = document.getElementById('music-panel');
+  musicToggle.addEventListener('click', () => {
+    musicPanel.classList.toggle('open');
+    if(ytReady && ytPlayer){
+      const state = ytPlayer.getPlayerState();
+      if(state === 1){ ytPlayer.pauseVideo(); } else { ytPlayer.playVideo(); }
+    }
   });
 
   // ---------- countdown ----------
@@ -876,13 +921,6 @@
       colorLight: '#ffffff'
     });
   }
-
-  // floating music player toggle
-  const musicToggle = document.getElementById('music-toggle');
-  const musicPanel = document.getElementById('music-panel');
-  musicToggle.addEventListener('click', () => {
-    musicPanel.classList.toggle('open');
-  });
 </script>
 
 </body>
